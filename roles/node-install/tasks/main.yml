@@ -1,0 +1,21 @@
+---
+- name: install dependent packages
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - xz
+
+- name: copy and unarchive node-{{node_version}}-linux-x64.tar.xz
+  unarchive:
+    src: node-{{node_version}}-linux-x64.tar.xz
+    dest: /App/src
+
+- name: move to /usr/local/node
+  command: mv /App/src/node-{{node_version}}-linux-x64 /usr/local/node
+
+- name: edit /etc/profile
+  blockinfile:
+    path: /etc/profile
+    marker: "# node"
+    block: export PATH=/usr/local/node/bin:$PATH
