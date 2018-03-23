@@ -11,5 +11,7 @@
 
 - 本地推送到远端
 ```
+# git add <文件名>
+# git commit -m "注释"
 # git push
 ```
