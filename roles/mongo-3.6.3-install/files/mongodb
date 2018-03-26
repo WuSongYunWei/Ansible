@@ -1,0 +1,66 @@
+#!/bin/bash
+# chkconfig: 2345 94 19
+# description:MongoDB
+
+MONGODB_BIN=/usr/local/mongodb/bin/mongod
+MONGODB_CONF=/data/mongodb/conf/mongodb.yml
+SYSTEM_MAXFD=65535
+
+. /etc/rc.d/init.d/functions
+
+if [ ! -f $MONGODB_BIN ]
+then
+    echo "mongodb startup: $MONGODB_BIN not exists! "
+    exit
+fi
+
+start() {
+    ulimit -HSn $SYSTEM_MAXFD
+    numactl --interleave=all $MONGODB_BIN -f "$MONGODB_CONF"
+    ret=$?
+
+    if [ $ret -eq 0 ]; then
+        action $"Starting mongodb: " /bin/true
+    else
+        action $"Starting mongodb: " /bin/false
+    fi
+}
+
+stop(){
+    PID=$(ps aux |grep "$MONGODB_CONF" |grep -v grep |wc -l)
+
+    if [[ $PID -eq 0  ]];then
+        echo "mongodb: not runing"
+    fi
+
+    $MONGODB_BIN --shutdown -f "$MONGODB_CONF"
+    ret=$?
+
+    if [ $ret -eq 0 ]; then
+        action $"Stopping mongodb: " /bin/true
+    else
+        action $"Stopping mongodb: " /bin/false
+    fi
+}
+
+restart() {
+    stop
+    sleep 2
+    start
+}
+
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+esac
+
