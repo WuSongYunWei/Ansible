@@ -1,0 +1,59 @@
+---
+- name: install dependent packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - openldap-clients
+    - nss-pam-ldapd
+    - authconfig
+
+- name: copy /etc/nslcd.conf
+  copy:
+    src: nslcd.conf
+    dest: /etc/nslcd.conf
+
+- name: copy /etc/pam_ldap.conf
+  copy:
+    src: pam_ldap.conf
+    dest: /etc/pam_ldap.conf
+
+- name: copy /etc/pam.d/system-auth
+  copy: 
+    src: system-auth
+    dest: /etc/pam.d/system-auth
+
+- name: copy /etc/nsswitch.conf
+  copy:
+    src: nsswitch.conf
+    dest: /etc/nsswitch.conf
+
+- name: copy /etc/sysconfig/authconfig
+  copy:
+    src: authconfig
+    dest: /etc/sysconfig/authconfig
+
+- name: create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/openldap/cacerts
+
+- name: copy /etc/openldap
+  copy:
+    src: admin.wusongtech.com.cert
+    dest: /etc/openldap/cacerts/admin.wusongtech.com.cert
+
+- name: copy /etc/openldap/cacerts
+  copy:
+    src: admin.wusongtech.com.key
+    dest: /etc/openldap/cacerts/admin.wusongtech.com.key
+
+- name: restart service nslcd
+  service:
+    name: nslcd
+    state: restarted
+
+
+
